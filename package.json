@@ -1,0 +1,34 @@
+{
+  "name": "tvue",
+  "version": "0.0.1",
+  "description": "",
+  "main": ".eslintrc.js",
+  "directories": {
+    "example": "example",
+    "test": "test",
+    "lib": "src"
+  },
+  "scripts": {
+    "dev": "cross-env NODE_ENV=development SERVER_TYPE=webpack node ./build/webpack.dev.js",
+    "build": "node build/webpack.prod.js",
+    "test": "jest --config test/jest.conf.js --coverage"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/xiaoboost/tvue.git"
+  },
+  "keywords": [
+    "vue",
+    "typescript"
+  ],
+  "author": "xiaoboost",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/xiaoboost/tvue/issues"
+  },
+  "homepage": "https://github.com/xiaoboost/tvue#readme",
+  "devDependencies": {
+    "tslint": "^5.10.0",
+    "typescript": "^2.9.1"
+  }
+}

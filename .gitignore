@@ -1,0 +1,6 @@
+.deploy_git/
+.vscode/launch.json
+node_modules/
+dist/
+npm-debug.log*
+test/coverage
