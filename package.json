@@ -9,9 +9,11 @@
     "lib": "src"
   },
   "scripts": {
-    "dev": "cross-env NODE_ENV=development SERVER_TYPE=webpack node ./build/webpack.dev.js",
-    "build": "node build/webpack.prod.js",
-    "test": "jest --config test/jest.conf.js --coverage"
+    "build": "node build/build.js",
+    "build:ts": "node node_modules/typescript/lib/tsc.js -p .",
+    "dev": "webpack --config example/webpack.config.js --watch",
+    "test": "jest --config test/jest.conf.js --coverage",
+    "release": "bash build/release.sh"
   },
   "repository": {
     "type": "git",
@@ -28,7 +30,23 @@
   },
   "homepage": "https://github.com/xiaoboost/tvue#readme",
   "devDependencies": {
+    "@types/chalk": "^2.2.0",
+    "@types/html-webpack-plugin": "^2.30.3",
+    "@types/mini-css-extract-plugin": "^0.2.0",
+    "@types/rollup": "^0.54.0",
+    "@types/shelljs": "^0.8.0",
+    "@types/webpack": "^4.4.0",
+    "chalk": "^2.4.1",
+    "css-loader": "^0.28.11",
+    "html-webpack-plugin": "^3.2.0",
+    "mini-css-extract-plugin": "^0.4.0",
+    "progress-bar-webpack-plugin": "^1.11.0",
+    "rollup": "^0.60.2",
+    "rollup-plugin-alias": "^1.4.0",
+    "rollup-plugin-replace": "^2.0.0",
+    "shelljs": "^0.8.2",
     "tslint": "^5.10.0",
-    "typescript": "^2.9.1"
+    "typescript": "^2.9.1",
+    "webpack": "^4.12.0"
   }
 }

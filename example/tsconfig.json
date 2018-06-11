@@ -1,6 +1,5 @@
 {
     "compilerOptions": {
-        "outDir": "lib",
         "sourceMap": true,
         "strict": true,
         "module": "esnext",
@@ -23,8 +22,6 @@
         "suppressImplicitAnyIndexErrors": true,
         "allowJs": true,
         "lib": ["es2015", "es2016", "es2017", "dom"],
-        "baseUrl": "."
     },
-    "include": ["src", "test", "types"],
-    "exclude": ["node_modules", "dist"]
+    "include": ["../src/*", "./*.ts", "./*.tsx"],
 }

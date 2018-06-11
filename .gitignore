@@ -4,3 +4,5 @@ node_modules/
 dist/
 npm-debug.log*
 test/coverage
+example/build.js*
+src/*.js*
