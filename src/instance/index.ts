@@ -1,8 +1,10 @@
 /* tslint:disable member-ordering */
 
 import VNode, { VNodeData, VNodeChildData } from '../vdom/vnode';
-import { createElement } from '../vdom/create-element';
-import { isFunc } from '../utils';
+
+import { eventsMixin } from './events';
+import { renderMixin } from './render';
+import { lifecycleMixin } from './lifecycle';
 
 interface PropData {
     type: object | object[];
@@ -15,15 +17,17 @@ export interface ComponentOptions {
     name?: string;
     components?: { [componentName: string]: typeof Vues };
     props?: { [key: string]: PropData };
-    data?: object;
+    data?(): object;
     computed?: object;
     methods?: { [key: string]: (...args: any[]) => any };
 }
 
-interface PluginObject {
+export interface PluginObject {
     install(Vue: typeof Vues): void;
     [key: string]: any;
 }
+
+export type CreateElement = Vues['$createElement'];
 
 export default class Vues {
     /** 组件选项 */
@@ -47,125 +51,63 @@ export default class Vues {
     $options!: ComponentOptions;
 
     /** 渲染函数声明 */
-    render!: (h: Vues['$createElement']) => VNode;
+    render!: (h: CreateElement) => VNode;
 
     // 生命周期
+    /** 将 DOM 元素插入页面之前 */
     beforeMount!: () => void;
+    /** 将 DOM 元素插入页面之后 */
     mounted!: () => void;
+    /** 销毁当前元素之前 */
     beforeDestroy!: () => void;
+    /** 销毁当前元素之后 */
     destroyed!: () => void;
+    /** 当前组件元素 DOM 更新之前 */
     beforeUpdate!: () => void;
 
-    /** 事件数据 */
-    private _events: { [eventName: string]: Array<(arg?: any) => any> } = {};
-    /** 状态数据 */
-    private _state: { [stateName: string]: any } = {};
-    /** 属性数据 */
-    private _props: { [propName: string]: any } = {};
-
-    /**  */
-    private _update(vnode: VNode) {
-
-    }
-
-    /** 计算生成当前虚拟 DOM 树 */
-    private _render() {
-        // render self
-        let vnode;
-
-        try {
-            vnode = this.render(this.$createElement);
-        }
-        catch (e) {
-            throw new Error(`(render) ${e.message}`);
-        }
-
-        // set parent
-        vnode.parent = this.$vnode.parent;
-        return vnode;
-    }
-
-    /** 以当前组件为上下文渲染虚拟节点 */
-    $createElement(tag: string, data: VNodeData | VNodeChildData, children?: VNodeChildData) {
-        return createElement(this, tag, data, children);
-    }
-    /** 创建并挂载 DOM */
-    $mount(el: string | Element) {
-        isFunc(this.beforeMount) && this.beforeMount();
-
-        // 组件更新回调
-        const updateComponent = () => {
-            this._update(this._render());
-        };
-
-        isFunc(this.mounted) && this.mounted();
-        return this;
-    }
-
+    // 事件部分声明
     /** 绑定事件 */
-    $on(eventName: string | string[], fn: (arg?: any) => any) {
-        if (Array.isArray(eventName)) {
-            eventName.forEach((event) => this.$on(event, fn));
-        }
-        else {
-            if (!this._events[eventName]) {
-                this._events[eventName] = [];
-            }
-
-            this._events[eventName].push(fn);
-        }
-
-        return this;
-    }
+    $on!: (eventName: string | string[], fn: (arg?: any) => any) => void;
     /** 绑定单次事件 */
-    $once(eventName: string, fn: (arg?: any) => any) {
-        const on = () => {
-            this.$off(eventName, on);
-            fn.apply(this, arguments);
-        };
-
-        this.$on(eventName, on);
-        return this;
-    }
+    $once!: (eventName: string, fn: (arg?: any) => any) => void;
     /** 解除事件绑定 */
-    $off(eventName?: string | string[], fn?: (arg?: any) => any) {
-        // 删除所有事件
-        if (!eventName) {
-            this._events = Object.create(null);
-        }
-        // 指定事件名数组
-        else if (Array.isArray(eventName)) {
-            eventName.forEach((event) => this.$off(event, fn));
-        }
-        // 指定某事件
-        else {
-            const cbs = this._events[eventName];
-
-            if (!cbs) {
-                return this;
-            }
-
-            if (!fn) {
-                delete this._events[eventName];
-                return this;
-            }
-
-            const fnIndex = cbs.findIndex((cb) => cb === fn);
-            if (fnIndex !== -1) {
-                cbs.splice(fnIndex, 1);
-            }
-        }
-
-        return this;
-    }
+    $off!: (eventName?: string | string[], fn?: (arg?: any) => any) => void;
     /** 触发事件 */
-    $emit(eventName: string, args: any) {
-        const cbs = this._events[eventName];
+    $emit!: (eventName: string, args: any) => void;
 
-        if (cbs) {
-            cbs.forEach((fn) => fn.apply(this, args));
-        }
+    // 生命周期部分声明
+    /** 创建并挂载 DOM */
+    $mount!: (el: string | Element) => void;
+    /** 更新当前组件 */
+    $forceUpdate!: () => void;
+    /** 销毁组件 */
+    $destroy!: () => void;
 
-        return this;
+    // DOM 渲染部分声明
+    /** 计算生成当前虚拟 DOM 树 */
+    _render!: () => VNode;
+    /**  */
+    _update!: (vn: VNode) => void;
+    /** 在下次 DOM 更新循环结束之后执行延迟回调 */
+    $nextTick!: (fn?: () => any) => Promise<void>;
+    /** 以当前组件为上下文渲染虚拟节点 */
+    $createElement!: (tag: string, data: VNodeData | VNodeChildData, children?: VNodeChildData) => VNode;
+
+    // 内部私有数据
+    /** 事件数据 */
+    _events: { [eventName: string]: Array<(arg?: any) => any> } = {};
+    /** 状态数据 */
+    _state: { [stateName: string]: any } = {};
+    /** 属性数据 */
+    _props: { [propName: string]: any } = {};
+    /** 监控数据 */
+    _watcher: { [watcherName: string]: any } = {};
+
+    constructor(options?: ComponentOptions) {
+
     }
 }
+
+eventsMixin(Vues);
+renderMixin(Vues);
+lifecycleMixin(Vues);
