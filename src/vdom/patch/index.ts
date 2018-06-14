@@ -6,7 +6,9 @@ import { patchVnode } from './patch-vnd';
 import { replaceElm } from './replace-elm';
 import { invokeDestroyHook, invokeInsertHook } from './hooks';
 
-export default function patch(oldVnode?: VNode, vnode?: VNode, removeOnly?: boolean) {
+export function patch(oldVnode: VNode | undefined, vnode: undefined): void;
+export function patch(oldVnode: VNode | undefined, vnode: VNode, removeOnly?: boolean): Element;
+export function patch(oldVnode?: VNode, vnode?: VNode, removeOnly?: boolean) {
     if (!vnode) {
         if (oldVnode) {
             invokeDestroyHook(oldVnode);

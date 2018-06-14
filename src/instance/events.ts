@@ -57,7 +57,7 @@ export function eventsMixin(Vue: typeof Component) {
         return this;
     };
 
-    Vue.prototype.$emit = function(this: Component, eventName: string, args: any) {
+    Vue.prototype.$emit = function(this: Component, eventName: string, args?: any) {
         const cbs = this._events[eventName];
 
         if (cbs) {

@@ -1,49 +1,50 @@
 import Component from './index';
 import VNode from '../vdom/vnode';
-import { isFunc } from '../utils';
+import { remove } from '../utils';
+
+function callHook(vm: Component, hook: string) {
+    const handlers = vm.$options[hook];
+
+    if (handlers) {
+        handlers.forEach((fn) => fn.apply(vm));
+    }
+
+    vm.$emit('hook:' + hook);
+}
 
 export function lifecycleMixin(Vue: typeof Component) {
     Vue.prototype._update = function(this: Component, vnode: VNode, hydrating?: boolean) {
-        const vm: Component = this
-        const prevEl = vm.$el
-        const prevVnode = vm._vnode
-        const prevActiveInstance = activeInstance
-        activeInstance = vm
-        vm._vnode = vnode
+        const prevEl = this.$el;
+        const prevVnode = this._vnode;
+
+        this._vnode = vnode;
+
         // Vue.prototype.__patch__ is injected in entry points
         // based on the rendering backend used.
         if (!prevVnode) {
-          // initial render
-          vm.$el = vm.__patch__(vm.$el, vnode, hydrating, false /* removeOnly */)
-        } else {
-          // updates
-          vm.$el = vm.__patch__(prevVnode, vnode)
+            // initial render
+            this.$el = this.__patch__(undefined, vnode, false /* removeOnly */);
         }
-        activeInstance = prevActiveInstance
-        // update __vue__ reference
-        if (prevEl) {
-          prevEl.__vue__ = null
+        else {
+            // updates
+            this.$el = this.__patch__(prevVnode, vnode);
         }
-        if (vm.$el) {
-          vm.$el.__vue__ = vm
-        }
+
         // if parent is an HOC, update its $el as well
-        if (vm.$vnode && vm.$parent && vm.$vnode === vm.$parent._vnode) {
-          vm.$parent.$el = vm.$el
+        if (this.$vnode && this.$parent && this.$vnode === this.$parent._vnode) {
+            this.$parent.$el = this.$el;
         }
-        // updated hook is called by the scheduler to ensure that children are
-        // updated in a parent's updated hook.
     };
 
     Vue.prototype.$mount = function(this: Component, el: string | Element) {
-        isFunc(this.beforeMount) && this.beforeMount();
+        callhook(this, 'beforeMount');
 
         // 组件更新回调
         const updateComponent = () => {
             this._update(this._render());
         };
 
-        isFunc(this.mounted) && this.mounted();
+        callhook(this, 'mounted');
         return this;
     };
 
@@ -54,45 +55,45 @@ export function lifecycleMixin(Vue: typeof Component) {
     };
 
     Vue.prototype.$destroy = function(this: Component) {
-    const vm: Component = this
-    if (vm._isBeingDestroyed) {
-        return
-    }
-    callHook(vm, 'beforeDestroy')
-    vm._isBeingDestroyed = true
-    // remove self from parent
-    const parent = vm.$parent
-    if (parent && !parent._isBeingDestroyed && !vm.$options.abstract) {
-        remove(parent.$children, vm)
-    }
-    // teardown watchers
-    if (vm._watcher) {
-        vm._watcher.teardown()
-    }
-    let i = vm._watchers.length
-    while (i--) {
-        vm._watchers[i].teardown()
-    }
-    // remove reference from data ob
-    // frozen object may not have observer.
-    if (vm._data.__ob__) {
-        vm._data.__ob__.vmCount--
-    }
-    // call the last hook...
-    vm._isDestroyed = true
-    // invoke destroy hooks on current rendered tree
-    vm.__patch__(vm._vnode, null)
-    // fire destroyed hook
-    callHook(vm, 'destroyed')
-    // turn off all instance listeners.
-    vm.$off()
-    // remove __vue__ reference
-    if (vm.$el) {
-        vm.$el.__vue__ = null
-    }
-    // release circular reference (#6759)
-    if (vm.$vnode) {
-        vm.$vnode.parent = null
-    }
+        if (this._isBeingDestroyed) {
+            return;
+        }
+
+        callHook(this, 'beforeDestroy');
+        this._isBeingDestroyed = true;
+
+        // remove self from parent
+        const parent = this.$parent;
+        if (parent && !parent._isBeingDestroyed) {
+            remove(parent.$children, this);
+        }
+
+        // teardown watchers
+        if (this._watcher) {
+            this._watcher.teardown();
+        }
+        let i = this._watchers.length;
+        while (i--) {
+            this._watchers[i].teardown();
+        }
+
+        // remove reference from data ob
+        // frozen object may not have observer.
+        if (this._data.__ob__) {
+            this._data.__ob__.thisCount--;
+        }
+
+        // call the last hook...
+        this._isDestroyed = true;
+        // invoke destroy hooks on current rendered tree
+        this.__patch__(this._vnode, undefined);
+        // fire destroyed hook
+        callHook(this, 'destroyed');
+        // turn off all instance listeners.
+        this.$off();
+        // release circular reference (#6759)
+        if (this.$vnode) {
+            this.$vnode.parent = undefined;
+        }
     };
 }

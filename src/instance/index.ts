@@ -1,6 +1,6 @@
-/* tslint:disable member-ordering */
+/* tslint:disable member-ordering variable-name */
 
-import VNode, { VNodeData, VNodeChildData } from '../vdom/vnode';
+import VNode, { VNodeData, VNodeChildData, patch } from '../vdom';
 
 import { eventsMixin } from './events';
 import { renderMixin } from './render';
@@ -73,7 +73,7 @@ export default class Vues {
     /** 解除事件绑定 */
     $off!: (eventName?: string | string[], fn?: (arg?: any) => any) => void;
     /** 触发事件 */
-    $emit!: (eventName: string, args: any) => void;
+    $emit!: (eventName: string, args?: any) => void;
 
     // 生命周期部分声明
     /** 创建并挂载 DOM */
@@ -84,6 +84,8 @@ export default class Vues {
     $destroy!: () => void;
 
     // DOM 渲染部分声明
+    /** 将虚拟 DOM 的差异应用到实际 DOM 中 */
+    __patch__!: typeof patch;
     /** 计算生成当前虚拟 DOM 树 */
     _render!: () => VNode;
     /**  */
@@ -94,14 +96,21 @@ export default class Vues {
     $createElement!: (tag: string, data: VNodeData | VNodeChildData, children?: VNodeChildData) => VNode;
 
     // 内部私有数据
+    /** 当前虚拟 DOM */
+    _vnode!: VNode;
     /** 事件数据 */
     _events: { [eventName: string]: Array<(arg?: any) => any> } = {};
     /** 状态数据 */
-    _state: { [stateName: string]: any } = {};
+    _data: { [stateName: string]: any } = {};
     /** 属性数据 */
     _props: { [propName: string]: any } = {};
     /** 监控数据 */
-    _watcher: { [watcherName: string]: any } = {};
+    _watchers: { [watcherName: string]: any } = {};
+
+    // 内部私有状态量定义
+    _isMounted = false;
+    _isDestroyed = false;
+    _isBeingDestroyed = false;
 
     constructor(options?: ComponentOptions) {
 
