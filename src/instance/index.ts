@@ -1,7 +1,9 @@
 /* tslint:disable member-ordering variable-name */
 
 import VNode, { VNodeData, VNodeChildData, patch } from '../vdom';
+import { Watcher } from '../observer';
 
+import { stateMixin } from './state';
 import { eventsMixin } from './events';
 import { renderMixin } from './render';
 import { lifecycleMixin } from './lifecycle';
@@ -104,8 +106,10 @@ export default class Vues {
     _data: { [stateName: string]: any } = {};
     /** 属性数据 */
     _props: { [propName: string]: any } = {};
-    /** 监控数据 */
-    _watchers: { [watcherName: string]: any } = {};
+    /** 监控器数据 */
+    _watchers: Watcher[] = [];
+    /** 组件本身的监控器 */
+    _watcher: Watcher | null = null;
 
     // 内部私有状态量定义
     _isMounted = false;
@@ -117,6 +121,7 @@ export default class Vues {
     }
 }
 
+stateMixin(Vues);
 eventsMixin(Vues);
 renderMixin(Vues);
 lifecycleMixin(Vues);

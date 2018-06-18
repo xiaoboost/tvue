@@ -37,14 +37,14 @@ export function lifecycleMixin(Vue: typeof Component) {
     };
 
     Vue.prototype.$mount = function(this: Component, el: string | Element) {
-        callhook(this, 'beforeMount');
+        callHook(this, 'beforeMount');
 
         // 组件更新回调
         const updateComponent = () => {
             this._update(this._render());
         };
 
-        callhook(this, 'mounted');
+        callHook(this, 'mounted');
         return this;
     };
 

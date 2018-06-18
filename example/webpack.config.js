@@ -7,6 +7,7 @@ function resolve(dir = '') {
 }
 
 module.exports = {
+    mode: 'development',
     entry: resolve('example/main.ts'),
     output: {
         path: resolve('example'),
@@ -15,9 +16,6 @@ module.exports = {
     resolve: {
         extensions: ['.ts', '.tsx', '.js'],
         mainFiles: ['index.ts'],
-        alias: {
-            'tvue': resolve('src/index.ts'),
-        },
     },
     devtool: 'source-map',
     module: {

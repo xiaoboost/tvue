@@ -1,3 +1,5 @@
+const _toString = Object.prototype.toString;
+
 /**
  * 断言：输入是否是数字
  *
@@ -78,7 +80,7 @@ export function isFunc(x: any): x is Function {
  * @returns {x is object}
  */
 export function isStrictObject(x: any): x is { [key: string]: any } {
-    return (Object.prototype.toString.call(x) === '[object Object]');
+    return _toString.call(x) === '[object Object]';
 }
 
 /**
@@ -115,7 +117,7 @@ export function isArray(x: any): x is any[] {
  * @returns {x is RegExp}
  */
 export function isRegExp(x: any): x is RegExp {
-    return (Object.prototype.toString.call(x) === '[object RegExp]');
+    return _toString.call(x) === '[object RegExp]';
 }
 
 /**
@@ -125,7 +127,7 @@ export function isRegExp(x: any): x is RegExp {
  * @returns {x is HTMLElement}
  */
 export function isElement(x: any): x is HTMLElement {
-    return (/^\[object (HTML|SVG)([a-zA-Z]+)?Element\]$/.test(Object.prototype.toString.call(x) as string));
+    return (/^\[object (HTML|SVG)([a-zA-Z]+)?Element\]$/.test(_toString.call(x) as string));
 }
 
 /**
@@ -152,4 +154,12 @@ export function isPrimitive(x: any): x is number | string | boolean | symbol {
         type === 'symbol' ||
         type === 'boolean'
     );
+}
+
+/**
+ * Check if val is a valid array index.
+ */
+export function isValidArrayIndex(x: any): x is number {
+    const n = parseFloat(String(x));
+    return n >= 0 && Math.floor(n) === n && isFinite(x);
 }
