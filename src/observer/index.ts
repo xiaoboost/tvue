@@ -13,6 +13,9 @@ import {
     isValidArrayIndex,
 } from 'src/utils';
 
+export * from './dep';
+export * from './watcher';
+
 export { Dep, Watcher };
 
 export interface ObservedObject {
@@ -118,8 +121,8 @@ export function observe(value: ObservedObject | object, asRootData?: boolean): O
 export function defineReactive(
     obj: object,
     key: string,
-    val: any,
-    customSetter?: ?Function,
+    val?: any,
+    customSetter?: () => any,
     shallow?: boolean,
 ) {
     const dep = new Dep();
@@ -136,7 +139,8 @@ export function defineReactive(
         val = obj[key];
     }
 
-    let childOb = !shallow && observe(val);
+    let childOb = shallow ? undefined : observe(val);
+
     Object.defineProperty(obj, key, {
         enumerable: true,
         configurable: true,
@@ -170,7 +174,8 @@ export function defineReactive(
             else {
                 val = newVal;
             }
-            childOb = !shallow && observe(newVal);
+
+            childOb = shallow ? undefined : observe(val);
             dep.notify();
         },
     });

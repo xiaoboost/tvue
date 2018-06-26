@@ -1,23 +1,61 @@
-import Dep from './dep';
+import Dep, { popTarget, pushTarget } from './dep';
+import VNode from '../vdom';
 import Component from 'src/instance';
+import { queueWatcher } from './scheduler';
 
 import {
     isFunc,
+    isObject,
+    isArray,
+    isBaseType,
     remove,
     parsePath,
 } from 'src/utils';
 
 // 全局监控器代号
 let uid = 0;
+// 全局监控器代号集合
+const seen = new Set<number>();
 
 export type WatcherCb = () => any;
 
 export interface WatchOption {
     deep?: boolean;
-    user?: boolean;
     computed?: boolean;
     sync?: boolean;
     before?: boolean;
+}
+
+/**
+ * 递归遍历对象，激活所有取值器
+ * 所以在对象内部的嵌套属性都会被收集，成为“深度 (deep)”的依赖
+ */
+export function traverse(val: any) {
+    const isA = isArray(val);
+
+    if (
+        isBaseType(val) ||
+        Object.isFrozen(val) ||
+        val instanceof VNode
+    ) {
+        return;
+    }
+
+    if (val.__ob__) {
+        const depId = val.__ob__.dep.id;
+        if (seen.has(depId)) {
+            return;
+        }
+
+        seen.add(depId);
+    }
+
+    if (isArray(val)) {
+        val.forEach(traverse);
+    }
+    else {
+        Object.values(val).forEach(traverse);
+    }
 }
 
 export default class Watcher implements Required<WatchOption> {
@@ -27,16 +65,16 @@ export default class Watcher implements Required<WatchOption> {
     active: boolean;
     dirty: boolean;
     deep: boolean;
-    user: boolean;
     computed: boolean;
     sync: boolean;
     before: boolean;
-    dep?: Dep;
     deps: Dep[];
     newDeps: Dep[];
-    depIds: Set<Dep>;
-    newDepIds: Set<Dep>;
+    depIds: Set<number>;
+    newDepIds: Set<number>;
     getter: () => any;
+
+    dep?: Dep;
     value: any;
 
     constructor(
@@ -56,13 +94,12 @@ export default class Watcher implements Required<WatchOption> {
         // options
         if (options) {
             this.deep = !!options.deep;
-            this.user = !!options.user;
             this.computed = !!options.computed;
             this.sync = !!options.sync;
             this.before = !!options.before;
         }
         else {
-            this.deep = this.user = this.computed = this.sync = this.before = false;
+            this.deep = this.computed = this.sync = this.before = false;
         }
 
         this.cb = cb;
@@ -104,7 +141,6 @@ export default class Watcher implements Required<WatchOption> {
      */
     get() {
         pushTarget(this);
-
         let value;
         const vm = this.vm;
 
@@ -112,12 +148,7 @@ export default class Watcher implements Required<WatchOption> {
             value = this.getter.call(vm, vm);
         }
         catch (e) {
-            if (this.user) {
-                handleError(e, vm, `getter for watcher "${this.expression}"`);
-            }
-            else {
-                throw e;
-            }
+            throw e;
         }
         finally {
             // "touch" every property so they are all tracked as
@@ -125,6 +156,7 @@ export default class Watcher implements Required<WatchOption> {
             if (this.deep) {
                 traverse(value);
             }
+
             popTarget();
             this.cleanupDeps();
         }
@@ -175,13 +207,13 @@ export default class Watcher implements Required<WatchOption> {
      * Will be called when a dependency changes.
      */
     update() {
-        /* istanbul ignore else */
-        if (this.computed) {
+        if (this.computed && this.dep) {
+            const dep = this.dep;
             // A computed property watcher has two modes: lazy and activated.
             // It initializes as lazy by default, and only becomes activated when
             // it is depended on by at least one subscriber, which is typically
             // another computed property or a component's render function.
-            if (this.dep.subs.length === 0) {
+            if (dep.subs.length === 0) {
                 // In lazy mode, we don't want to perform computations until necessary,
                 // so we simply mark the watcher as dirty. The actual computation is
                 // performed just-in-time in this.evaluate() when the computed property
@@ -192,7 +224,7 @@ export default class Watcher implements Required<WatchOption> {
                 // In activated mode, we want to proactively perform the computation
                 // but only notify our subscribers when the value has indeed changed.
                 this.getAndInvoke(() => {
-                    this.dep.notify();
+                    dep.notify();
                 });
             }
         }
@@ -228,17 +260,8 @@ export default class Watcher implements Required<WatchOption> {
             const oldValue = this.value;
             this.value = value;
             this.dirty = false;
-            if (this.user) {
-                try {
-                    cb.call(this.vm, value, oldValue);
-                }
-                catch (e) {
-                    handleError(e, this.vm, `callback for watcher "${this.expression}"`);
-                }
-            }
-            else {
-                cb.call(this.vm, value, oldValue);
-            }
+
+            cb.call(this.vm, value, oldValue);
         }
     }
 

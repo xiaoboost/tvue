@@ -3,7 +3,7 @@ import VNode from '../vdom/vnode';
 import { remove } from '../utils';
 
 function callHook(vm: Component, hook: string) {
-    const handlers = vm.$options[hook];
+    const handlers = vm.$options[hook] as undefined | Array<() => void>;
 
     if (handlers) {
         handlers.forEach((fn) => fn.apply(vm));
