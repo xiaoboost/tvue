@@ -1,6 +1,6 @@
-import Vues from './instance';
+import Vue from './instance';
 
 export * from './instance';
-// export * from './decorator';
+export * from './decorator';
 
-export default Vues;
+export default Vue;
