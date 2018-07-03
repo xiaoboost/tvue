@@ -6,3 +6,4 @@ npm-debug.log*
 test/coverage
 example/build.js*
 src/*.js*
+old/*

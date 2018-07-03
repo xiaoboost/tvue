@@ -2,6 +2,10 @@
     "defaultSeverity": "error",
     "extends":"tslint:recommended",
     "rules": {
+        // 允许直接使用 Number 等内置类型构造函数名称直接作为类型
+        "ban-types": false,
+        // 不强制 class/interface 内字段顺序
+        "member-ordering": false,
         // 类定义时，不需要写出 public 关键字
         "member-access": [true, "no-public"],
         // 允许带有副作用的 import 语句
@@ -82,8 +86,8 @@
         "ordered-imports": false,
         // 如果类方法并不强制使用 this
         "prefer-function-over-method": false,
-        // 方法标记应该使用 foo(): void 这种形式
-        "prefer-method-signature": true,
+        // 方法定义不强制使用 foo(): void 这种形式
+        "prefer-method-signature": false,
         // 多字符串相连时应该使用字符串模板
         "prefer-template": [true, "allow-single-concat"],
         // 字符串强制使用单引号
