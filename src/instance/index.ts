@@ -1,12 +1,5 @@
 import { stateMixin } from './state';
 
-export interface ComponentOptions {
-    name?: string;
-    components?: { [componentName: string]: typeof Vuetc };
-    props?: string[];
-    data?: string[];
-}
-
 export default class Vuetc {
     // 组件属性
     $options!: ComponentOptions;
@@ -19,6 +12,13 @@ export default class Vuetc {
     _isMounted = false;
     _isDestroyed = false;
     _isBeingDestroyed = false;
+}
+
+export interface ComponentOptions {
+    name?: string;
+    components?: { [componentName: string]: typeof Vuetc };
+    props?: string[];
+    data?: string[];
 }
 
 stateMixin(Vuetc);

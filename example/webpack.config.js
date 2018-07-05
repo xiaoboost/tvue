@@ -1,5 +1,5 @@
 const path = require('path');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
+const webpack = require('webpack');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
 function resolve(dir = '') {
@@ -64,11 +64,6 @@ module.exports = {
         new webpack.optimize.ModuleConcatenationPlugin(),
         new MiniCssExtractPlugin({
             filename:'css/main.css',
-        }),
-        new HtmlWebpackPlugin({
-            filename: 'index.html',
-            template: resolve('example/index.html'),
-            inject: true,
         }),
     ],
 };

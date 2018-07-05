@@ -1,9 +1,5 @@
 import Component from './index';
 
-import {
-    isStrictObject,
- } from 'src/utils';
-
 function initProps() {
 
 }
