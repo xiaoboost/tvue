@@ -5,7 +5,7 @@ export default class Vuetc {
     $options!: ComponentOptions;
 
     // 内部私有数据
-    _data: { [stateName: string]: any } = {};
+    _state: { [stateName: string]: any } = {};
     _props: { [propName: string]: any } = {};
 
     // 内部私有状态量定义
@@ -18,7 +18,7 @@ export interface ComponentOptions {
     name?: string;
     components?: { [componentName: string]: typeof Vuetc };
     props?: string[];
-    data?: string[];
+    state?: string[];
 }
 
 stateMixin(Vuetc);

@@ -1,8 +1,16 @@
 import Vuets from '../instance';
 
-function setOptions(prototype: { $options: any }, key: string, val: any) {
+function setOptions(target: Vuets | typeof Vuets, key: string, val: any) {
+    const Ctor = typeof target === 'function' ? target : target.constructor;
+    const prototype = Ctor.prototype;
+
     if (!prototype.$options) {
-        prototype.$options = {};
+        Object.defineProperty(prototype, '$options', {
+            enumerable: false,
+            configurable: true,
+            writable: false,
+            value: {},
+        });
     }
 
     if (!prototype.$options[key]) {
@@ -13,7 +21,7 @@ function setOptions(prototype: { $options: any }, key: string, val: any) {
 }
 
 export function Prop(target: Vuets | typeof Vuets, propertyKey: string) {
-    const props = setOptions(Vuets.prototype, 'props', []);
+    const props = setOptions(target, 'props', []);
 
     if (!props.includes(propertyKey)) {
         props.push(propertyKey);
@@ -21,9 +29,9 @@ export function Prop(target: Vuets | typeof Vuets, propertyKey: string) {
 }
 
 export function State(target: Vuets | typeof Vuets, propertyKey: string) {
-    const props = setOptions(Vuets.prototype, 'data', []);
+    const states = setOptions(target, 'state', []);
 
-    if (!props.includes(propertyKey)) {
-        props.push(propertyKey);
+    if (!states.includes(propertyKey)) {
+        states.push(propertyKey);
     }
 }
