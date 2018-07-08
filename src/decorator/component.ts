@@ -6,10 +6,12 @@ export type VuetsClass<V> = { new (...args: any[]): V & Vuets } & typeof Vuets;
 function mergeOptions(to: ComponentOptions, from: ComponentOptions) {
     if (from.props) {
         to.props = (to.props || []).concat(from.props);
+        to.props = Array.from(new Set(to.props));
     }
 
     if (from.state) {
         to.state = (to.state || []).concat(from.state);
+        to.props = Array.from(new Set(to.state));
     }
 }
 

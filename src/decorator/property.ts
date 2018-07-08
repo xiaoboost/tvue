@@ -1,16 +1,12 @@
 import Vuets from '../instance';
+import { def } from 'src/utils';
 
 function setOptions(target: Vuets | typeof Vuets, key: string, val: any) {
     const Ctor = typeof target === 'function' ? target : target.constructor;
     const prototype = Ctor.prototype;
 
     if (!prototype.$options) {
-        Object.defineProperty(prototype, '$options', {
-            enumerable: false,
-            configurable: true,
-            writable: false,
-            value: {},
-        });
+        def(prototype, '$options', {});
     }
 
     if (!prototype.$options[key]) {

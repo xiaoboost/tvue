@@ -56,7 +56,7 @@ export function hyphenate(str: string) {
  * @param obj 检查对象
  * @param key 检查的属性名称
  */
-export function hasOwn(obj: object, key: string): boolean {
+export function hasOwn(obj: object, key: string | number): boolean {
     return Object.prototype.hasOwnProperty.call(obj, key);
 }
 
@@ -67,3 +67,8 @@ export function hasOwn(obj: object, key: string): boolean {
 export function isEmpty(obj: object): boolean {
     return Object.keys(obj).length > 0;
 }
+
+/**
+ * 是否是保留属性名
+ */
+export const isReservedAttribute = makeMap('key,ref,slot,slot-scope,is,style,class');
