@@ -79,7 +79,7 @@ export function isFunc(x: any): x is Function {
  * @param {*} x
  * @returns {x is object}
  */
-export function isStrictObject(x: any): x is { [key: string]: any } {
+export function isStrictObject(x: any): x is object {
     return _toString.call(x) === '[object Object]';
 }
 

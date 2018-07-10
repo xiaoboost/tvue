@@ -1,5 +1,5 @@
 import { stateMixin } from './state';
-import { Watcher } from '../observer';
+import { Watcher, WatcherOption } from '../observer';
 
 export default class Vuetc {
     // 组件属性
@@ -9,6 +9,11 @@ export default class Vuetc {
     // 公共方法
     $set!: (target: any, key: string | number, val: any) => void;
     $delete!: (target: any, key: string | number) => void;
+    $watch!: (
+        express: string,
+        callback: string | ((newVal: any, oldVal: any) => void) | WatcherOption,
+        option?: WatcherOption,
+    ) => (() => void);
 
     // 内部私有数据
     _state: { [stateName: string]: any } = {};
