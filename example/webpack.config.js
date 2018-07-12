@@ -22,20 +22,6 @@ module.exports = {
         rules: [
             {
                 test: /\.tsx?$/,
-                loader: 'tslint-loader',
-                enforce: 'pre',
-                options: {
-                    typeCheck: true,
-                    emitErrors: true,
-                    // relative to the project root directory
-                    configFile: './tslint.json',
-                    tsConfigFile: './example/tsconfig.json',
-                    include: [resolve('example'), resolve('src')],
-                    formattersDirectory: 'node_modules/tslint-loader/formatters/',
-                },
-            },
-            {
-                test: /\.tsx?$/,
                 loader: 'ts-loader',
                 exclude: /node_modules/,
                 options: {
