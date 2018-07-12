@@ -11,10 +11,12 @@ import {
 } from '../observer';
 
 import {
+    warn,
     hyphenate,
     isString,
     isFunc,
     isStrictObject,
+    isReserved,
     isReservedAttribute,
 } from 'src/utils';
 
@@ -41,40 +43,82 @@ function createWatcher(
     return vm.$watch(expOrFn, cb, options);
 }
 
-function initProps(vm: Component, propsOptions: string[]) {
+function initProps(vm: Component) {
     if (!vm.$options.props) {
         return;
+    }
+
+    function propProxy(key: string) {
+        const option: PropertyDescriptor = {
+            enumerable: true,
+            configurable: true,
+            get: () => vm._props[key],
+        };
+
+        if (process.env.NODE_ENV !== 'production') {
+            option.set = () => warn('prop is readonly', vm);
+        }
+
+        Object.defineProperty(vm, key, option);
     }
 
     const props = vm._props;
     const keys = vm.$options.props;
 
     for (const key of keys) {
-        const value = vm[key] as any;
+        const value = (vm[key] || null) as any;
         const hyphenatedKey = hyphenate(key);
 
         if (isReservedAttribute(hyphenatedKey)) {
-            console.error(`"${hyphenatedKey}" is a reserved attribute and cannot be used as component prop.`);
+            console.error(
+                `"${hyphenatedKey}" is a reserved attribute` +
+                'and cannot be used as component prop. So skip this prop.',
+            );
+            continue;
         }
-        else {
-            defineReactive(props, key, value);
-        }
+
+        defineReactive(props, key, value);
+        propProxy(key);
     }
 }
 
-function initData(vm: Component, stateOptions: string[]) {
-    // ..
+function initStateData(vm: Component) {
+    const state = vm._state;
+    const keys = vm.$options.state || [];
+
+    function stateProxy(key: string) {
+        const option: PropertyDescriptor = {
+            enumerable: true,
+            configurable: true,
+            get: () => vm._state[key],
+            set: (val: any) => vm._state[key] = val,
+        };
+
+        Object.defineProperty(vm, key, option);
+    }
+
+    for (const key of keys) {
+        const value = (vm[key] || null) as any;
+
+        if (!isReserved(key)) {
+            state[key] = value;
+            stateProxy(key);
+        }
+    }
+
+    // observe data
+    observe(state, true /* asRootData */);
 }
 
 export function initState(vm: Component) {
     const opts = vm.$options;
 
     if (opts.props) {
-        initProps(vm, opts.props);
+        initProps(vm);
     }
 
     if (opts.state) {
-        initData(vm, opts.state);
+        initStateData(vm);
     }
 }
 

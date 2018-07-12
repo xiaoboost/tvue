@@ -1,3 +1,4 @@
+import Component from '../instance';
 import Dep from './dep';
 import VNode from '../vdom';
 
@@ -20,7 +21,7 @@ import {
  *  - 如果成功观察则返回新观察者
  *  - 如果值已经有，则返回现有观察者
  */
-export function observe(value: object, asRootData?: boolean): Observer | void {
+export function observe(value: object | Component, asRootData?: boolean): Observer | void {
     if (!isObject(value) || value instanceof VNode) {
         return;
     }
@@ -32,7 +33,7 @@ export function observe(value: object, asRootData?: boolean): Observer | void {
     else if (
       (isArray(value) || isStrictObject(value)) &&
       Object.isExtensible(value) &&
-      !value._isVue
+      !(value as Component)._isVue
     ) {
         ob = new Observer(value);
     }
@@ -40,6 +41,7 @@ export function observe(value: object, asRootData?: boolean): Observer | void {
     if (asRootData && ob) {
         ob.vmCount++;
     }
+
     return ob;
 }
 

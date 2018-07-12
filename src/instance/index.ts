@@ -21,6 +21,7 @@ export default class Vuetc {
     _watchers: Watcher[] = [];
 
     // 内部私有状态量定义
+    _isVue = true;
     _isMounted = false;
     _isDestroyed = false;
     _isBeingDestroyed = false;
