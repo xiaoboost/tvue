@@ -1,5 +1,5 @@
 import Watcher from './watcher';
-import { remove } from 'src/utils';
+import { remove } from '../utils';
 
 let uid = 0;
 

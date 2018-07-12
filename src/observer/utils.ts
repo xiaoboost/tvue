@@ -14,7 +14,7 @@ import {
     isStrictObject,
     isValidArrayIndex,
     hasOwn,
-} from 'src/utils';
+} from '../utils';
 
 /**
  * 尝试为值创建观察者实例

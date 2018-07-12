@@ -11,7 +11,7 @@ function mergeOptions(to: ComponentOptions, from: ComponentOptions) {
 
     if (from.state) {
         to.state = (to.state || []).concat(from.state);
-        to.props = Array.from(new Set(to.state));
+        to.state = Array.from(new Set(to.state));
     }
 }
 
@@ -19,10 +19,15 @@ function componentFactory(
     Comp: VuetsClass<Vuets>,
     options: ComponentOptions = {},
 ): VuetsClass<Vuets> {
+    // collect instance's properties
+    const data = new Comp();
+
     // new Component class
     class VueComponent extends Vuets {
         constructor() {
             super();
+
+            Object.assign(this, data);
 
             initState(this);
         }

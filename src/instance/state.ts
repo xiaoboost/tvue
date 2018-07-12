@@ -18,7 +18,7 @@ import {
     isStrictObject,
     isReserved,
     isReservedAttribute,
-} from 'src/utils';
+} from '../utils';
 
 function createWatcher(
     vm: Component,

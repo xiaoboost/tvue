@@ -1,5 +1,5 @@
 import Dep from './dep';
-import { hasOwn } from 'src/utils';
+import { hasOwn } from '../utils';
 
 export interface ObservedObject {
     __ob__: Observer;

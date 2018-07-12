@@ -1,5 +1,5 @@
 import Vuets from '../instance';
-import { def } from 'src/utils';
+import { def } from '../utils';
 
 function setOptions(target: Vuets | typeof Vuets, key: string, val: any) {
     const Ctor = typeof target === 'function' ? target : target.constructor;
