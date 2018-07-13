@@ -6,6 +6,7 @@ const port = 8080,
     baseConfig = require('../example/webpack.config'),
     FriendlyErrorsPlugin = require('friendly-errors-webpack-plugin');
 
+console.log('\x1Bc');
 console.log(chalk.yellow('> Start Compile:\n'));
 
 baseConfig.plugins.push(

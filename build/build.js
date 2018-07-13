@@ -7,6 +7,7 @@ const fs = require('fs'),
     spawn = require('child_process').spawn,
     alias = require('rollup-plugin-alias'),
     replace = require('rollup-plugin-replace'),
+    nodeResolve = require('rollup-plugin-node-resolve'),
     project = require('../package.json'),
     tsconfig = require('../tsconfig.json'),
     output = resolve('dist');
@@ -64,6 +65,12 @@ function createEnv(config) {
             'plugins': [
                 alias({
                     'tslib': resolve('node_modules/tslib/tslib.es6.js'),
+                }),
+                nodeResolve({
+                    module: true,
+                    jsnext: true,
+                    main: true,
+                    extensions: ['.js', '.json'],
                 }),
             ],
         },
