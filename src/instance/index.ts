@@ -19,6 +19,7 @@ export default class Vuetc {
     _state: { [stateName: string]: any } = {};
     _props: { [propName: string]: any } = {};
     _watchers: Watcher[] = [];
+    _watcher?: Watcher;
 
     // 内部私有状态量定义
     _isVue = true;

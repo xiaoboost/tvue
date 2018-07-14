@@ -1,6 +1,6 @@
-import Component from '../instance';
 import Dep from './dep';
 import VNode from '../vdom';
+import Component from '../instance';
 
 import Observer, {
     isObservedObject,
