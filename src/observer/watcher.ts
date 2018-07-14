@@ -1,7 +1,6 @@
 import Dep from './dep';
 import VNode from '../vdom';
 import Component from '../instance';
-
 import { queueWatcher } from './scheduler';
 
 import {
@@ -15,14 +14,6 @@ import {
     handleError,
 } from '../utils';
 
-interface WatcherConOption {
-    deep: boolean;
-    computed: boolean;
-    user: boolean;
-    sync: boolean;
-    before?: () => any;
-}
-
 // 全局观测器代号
 let uid = 0;
 // 全局观测器代号集合
@@ -34,6 +25,14 @@ export interface WatcherOption {
     deep?: boolean;
     immediate?: boolean;
     handler?: WatcherCb;
+}
+
+interface WatcherConOption {
+    deep: boolean;
+    computed: boolean;
+    user: boolean;
+    sync: boolean;
+    before?: () => any;
 }
 
 /**
