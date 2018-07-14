@@ -1,7 +1,11 @@
 import Component from './index';
 
+import { remove, handleError } from '../utils';
+
+type eventCb = (arg?: any) => any;
+
 export function eventsMixin(Vue: typeof Component) {
-    Vue.prototype.$on = function(this: Component, eventName: string | string[], fn: (arg?: any) => any) {
+    Vue.prototype.$on = function(this: Component, eventName: string | string[], fn: eventCb) {
         if (Array.isArray(eventName)) {
             eventName.forEach((event) => this.$on(event, fn));
         }
@@ -16,7 +20,7 @@ export function eventsMixin(Vue: typeof Component) {
         return this;
     };
 
-    Vue.prototype.$once = function(this: Component, eventName: string, fn: (arg?: any) => any) {
+    Vue.prototype.$once = function(this: Component, eventName: string, fn: eventCb) {
         const on = (arg?: any) => {
             this.$off(eventName, on);
             fn.apply(this, arg);
@@ -26,7 +30,7 @@ export function eventsMixin(Vue: typeof Component) {
         return this;
     };
 
-    Vue.prototype.$off = function(this: Component, eventName?: string | string[], fn?: (arg?: any) => any) {
+    Vue.prototype.$off = function(this: Component, eventName?: string | string[], fn?: eventCb) {
         // 删除所有事件
         if (!eventName) {
             this._events = Object.create(null);
@@ -48,10 +52,7 @@ export function eventsMixin(Vue: typeof Component) {
                 return this;
             }
 
-            const fnIndex = cbs.findIndex((cb) => cb === fn);
-            if (fnIndex !== -1) {
-                cbs.splice(fnIndex, 1);
-            }
+            remove(cbs, fn);
         }
 
         return this;
@@ -61,7 +62,14 @@ export function eventsMixin(Vue: typeof Component) {
         const cbs = this._events[eventName];
 
         if (cbs) {
-            cbs.forEach((fn) => fn.apply(this, args));
+            for (const fn of cbs) {
+                try {
+                    fn.apply(this, args);
+                }
+                catch (e) {
+                    handleError(e, this, `event handler for "${event}"`);
+                }
+            }
         }
 
         return this;
