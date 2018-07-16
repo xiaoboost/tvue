@@ -16,6 +16,9 @@ module.exports = {
     resolve: {
         extensions: ['.ts', '.tsx', '.js'],
         mainFiles: ['index.ts'],
+        alias: {
+            tvue: resolve('src/index.ts'),
+        },
     },
     devtool: 'source-map',
     module: {
@@ -24,10 +27,6 @@ module.exports = {
                 test: /\.tsx?$/,
                 loader: 'ts-loader',
                 exclude: /node_modules/,
-                options: {
-                    transpileOnly: false,
-                    configFile: resolve('example/tsconfig.json'),
-                },
             },
             {
                 test: /\.css$/,
