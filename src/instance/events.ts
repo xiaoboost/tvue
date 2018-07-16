@@ -2,7 +2,7 @@ import Component from './index';
 
 import { remove, handleError } from '../utils';
 
-type eventCb = (arg?: any) => any;
+export type eventCb = (arg?: any) => any;
 
 export function eventsMixin(Vue: typeof Component) {
     Vue.prototype.$on = function(this: Component, eventName: string | string[], fn: eventCb) {
@@ -58,7 +58,7 @@ export function eventsMixin(Vue: typeof Component) {
         return this;
     };
 
-    Vue.prototype.$emit = function(this: Component, eventName: string, args?: any) {
+    Vue.prototype.$emit = function(this: Component, eventName: string, ...args: any[]) {
         const cbs = this._events[eventName];
 
         if (cbs) {

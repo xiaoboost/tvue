@@ -1,5 +1,5 @@
 import { stateMixin } from './state';
-import { eventsMixin } from './events';
+import { eventsMixin, eventCb } from './events';
 import { Watcher, WatcherOption } from '../observer';
 
 type WatcherCallback = string | ((newVal: any, oldVal: any) => void) | WatcherOption;
@@ -13,10 +13,10 @@ export default class Vuetc {
     $set!: (target: any, key: string | number, val: any) => void;
     $delete!: (target: any, key: string | number) => void;
     $watch!: ( express: string, callback: WatcherCallback, option?: WatcherOption) => (() => void);
-    $on!: (eventName: string | string[], fn: (arg?: any) => any) => void;
-    $once!: (eventName: string, fn: (arg?: any) => any) => void;
-    $off!: (eventName?: string | string[], fn?: (arg?: any) => any) => void;
-    $emit!: (eventName: string, args?: any) => void;
+    $on!: (eventName: string | string[], fn: eventCb) => void;
+    $once!: (eventName: string, fn: eventCb) => void;
+    $off!: (eventName?: string | string[], fn?: eventCb) => void;
+    $emit!: (eventName: string, ...args: any[]) => void;
 
     // 内部私有数据
     _events: { [eventName: string]: Array<(arg?: any) => any> } = {};
