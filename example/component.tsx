@@ -1,4 +1,4 @@
-import Vue, { Component, Prop, State } from '../src';
+import Vue, { Component, Prop, State } from 'tvue';
 
 @Component
 export default class App extends Vue {

@@ -23,8 +23,11 @@
         "suppressImplicitAnyIndexErrors": true,
         "allowJs": true,
         "lib": ["es2015", "es2016", "es2017", "dom"],
-        "baseUrl": "."
+        "baseUrl": ".",
+        "paths": {
+            "tvue": ["src/index.ts"]
+        }
     },
-    "include": ["src", "test", "types"],
+    "include": ["src", "test", "example"],
     "exclude": ["node_modules", "dist"]
 }
