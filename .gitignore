@@ -2,7 +2,7 @@
 .vscode/launch.json
 node_modules/
 npm-debug.log*
-test/coverage
+test/unit/coverage
 example/build.js*
 src/*.js*
 dist/*

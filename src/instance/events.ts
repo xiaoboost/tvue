@@ -21,7 +21,7 @@ export function eventsMixin(Vue: typeof Component) {
     };
 
     Vue.prototype.$once = function(this: Component, eventName: string, fn: eventCb) {
-        const on = (arg?: any) => {
+        const on = (...arg: any[]) => {
             this.$off(eventName, on);
             fn.apply(this, arg);
         };
@@ -61,14 +61,16 @@ export function eventsMixin(Vue: typeof Component) {
     Vue.prototype.$emit = function(this: Component, eventName: string, ...args: any[]) {
         const cbs = this._events[eventName];
 
-        if (cbs) {
-            for (const fn of cbs) {
-                try {
-                    fn.apply(this, args);
-                }
-                catch (e) {
-                    handleError(e, this, `event handler for "${event}"`);
-                }
+        if (!cbs) {
+            return this;
+        }
+
+        for (const fn of cbs) {
+            try {
+                fn.apply(this, args);
+            }
+            catch (e) {
+                handleError(e, this, `event handler for "${eventName}"`);
             }
         }
 
