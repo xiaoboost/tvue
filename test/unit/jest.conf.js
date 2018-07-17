@@ -15,5 +15,7 @@ module.exports = {
     coverageDirectory: '<rootDir>/test/unit/coverage',
     collectCoverageFrom: [
         'src/**/*.ts',
+        '!src/**/index.ts',
+        '!src/utils/!(next-tick).ts',
     ],
 };
