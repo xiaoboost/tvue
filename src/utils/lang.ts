@@ -22,7 +22,7 @@ export function def(obj: object, key: string, val: any, enumerable = false) {
  * Parse simple path.
  */
 const bailRE = /[^\w.$]/;
-export function parsePath(path: string): any {
+export function parsePath(path: string): undefined | ((obj: object) => any) {
     if (bailRE.test(path)) {
         return;
     }
