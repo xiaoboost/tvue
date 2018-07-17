@@ -133,9 +133,12 @@ export default class Watcher implements WatcherConOption {
             this.getter = expOrFn;
         }
         else {
-            this.getter = parsePath(expOrFn);
+            const getter = parsePath(expOrFn);
 
-            if (!this.getter) {
+            if (getter) {
+                this.getter = getter;
+            }
+            else {
                 this.getter = () => { return; };
 
                 if (process.env.NODE_ENV !== 'production') {
