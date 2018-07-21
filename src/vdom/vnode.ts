@@ -1,5 +1,4 @@
 import Component from '../instance';
-import { remove } from '../utils';
 
 type eventCb = (e: any) => any;
 type nativeCb = (e: Event) => any;
@@ -7,6 +6,8 @@ type hookCb = (...args: any[]) => void;
 type hookNames =
     'create' | 'init' | 'prepatch' | 'update' |
     'postpatch' | 'insert' | 'remove' | 'destroy';
+
+export type VNodeChildren = Array<VNode | string>;
 
 export interface VNodeComponentOptions {
     Ctor: typeof Component;
