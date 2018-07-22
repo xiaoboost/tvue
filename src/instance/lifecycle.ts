@@ -1,7 +1,11 @@
 import VNode from '../vdom';
 import Component from './index';
 import { Watcher } from '../observer';
-import { isString, remove, warn } from '../utils';
+import { isString, remove, warn, handleError } from '../utils';
+
+export type LifecycleKeys =
+    'beforeMount' | 'mounted' |
+    'beforeDestroy' | 'destroyed' | 'beforeUpdate';
 
 export function lifecycleMixin(Vue: typeof Component) {
     Vue.prototype._update = function(this: Component, vnode: VNode) {
@@ -24,14 +28,26 @@ export function lifecycleMixin(Vue: typeof Component) {
         }
     };
 
+    Vue.prototype._callHook = function(this: Component, name: LifecycleKeys) {
+        const handler = this.$options[name];
+        if (handler) {
+            try {
+                handler.call(this);
+            }
+            catch (e) {
+                handleError(e, this, `${name} hook`);
+            }
+        }
+    };
+
     Vue.prototype.$forceUpdate = function(this: Component) {
         if (this._watcher) {
             this._watcher.update();
         }
     };
 
-    Vue.prototype.$mount = function(this: Component, entry?: string | Element): this {
-        let el: Element, updateComponent: () => void;
+    Vue.prototype.$mount = function(this: Component, entry?: string | Element) {
+        let el: Element;
 
         if (!entry) {
             el = document.createElement('div');
@@ -58,35 +74,14 @@ export function lifecycleMixin(Vue: typeof Component) {
 
         this.$el = el;
 
-        callHook(this, 'beforeMount');
+        this._callHook('beforeMount');
 
-        /* istanbul ignore if */
-        if (process.env.NODE_ENV !== 'production') {
-            updateComponent = () => {
-                const name = this._name
-                const id = this._uid
-                const startTag = `vue-perf-start:${id}`
-                const endTag = `vue-perf-end:${id}`
-
-                mark(startTag)
-                const vnode = this._render();
-                mark(endTag)
-                measure(`vue ${name} render`, startTag, endTag);
-
-                mark(startTag);
-                this._update(vnode);
-                mark(endTag);
-                measure(`vue ${name} patch`, startTag, endTag);
-            };
-        }
-        else {
-            updateComponent = () => {
-                this._update(this._render());
-            };
-        }
+        const updateComponent = () => {
+            this._update(this._render());
+        };
 
         const before = function(this: Component) {
-            this._isMounted && callHook(this, 'beforeUpdate');
+            this._isMounted && this._callHook('beforeUpdate');
         };
 
         // we set this to this._watcher inside the watcher's constructor
@@ -98,7 +93,7 @@ export function lifecycleMixin(Vue: typeof Component) {
         // mounted is called for render-created child components in its inserted hook
         if (document.body.contains(this.$el)) {
             this._isMounted = true;
-            callHook(this, 'mounted');
+            this._callHook('mounted');
         }
 
         return this;
@@ -109,7 +104,7 @@ export function lifecycleMixin(Vue: typeof Component) {
             return;
         }
 
-        callHook(this, 'beforeDestroy');
+        this._callHook('beforeDestroy');
 
         this._isBeingDestroyed = true;
         // remove self from parent
@@ -139,7 +134,7 @@ export function lifecycleMixin(Vue: typeof Component) {
         this._patch(this.$vnode);
 
         // fire destroyed hook
-        callHook(this, 'destroyed');
+        this._callHook('destroyed');
         // turn off all instance listeners.
         this.$off();
 
