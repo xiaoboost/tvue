@@ -6,14 +6,18 @@ import { renderMixin } from './render';
 import { lifecycleMixin } from './lifecycle';
 
 import { nextTick } from '../utils';
+import { patch } from '../vdom/patch';
 import { Watcher, WatcherOption } from '../observer';
 
+type CreateElement = Vuetc['$createElement'];
 type WatcherCallback = string | ((newVal: any, oldVal: any) => void) | WatcherOption;
 
 export default class Vuetc {
     // 组件属性
     $options!: ComponentOptions;
     $parent?: Vuetc;
+    $el!: Element;
+    $vnode!: VNode;
 
     // 公共方法
     $set!: (target: any, key: string | number, val: any) => void;
@@ -37,6 +41,7 @@ export default class Vuetc {
 
     // 私有方法
     _render!: () => VNode;
+    _patch!: typeof patch;
     _update!: (vnode: VNode, hydrating?: boolean) => void;
 
     // 内部私有状态
@@ -44,6 +49,9 @@ export default class Vuetc {
     _isMounted = false;
     _isDestroyed = false;
     _isBeingDestroyed = false;
+
+    // 渲染函数
+    render!: (h: CreateElement) => VNode;
 
     $nextTick(): Promise<this>;
     $nextTick(fn: Function): void;
