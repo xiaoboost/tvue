@@ -96,7 +96,7 @@ export function withMacroTask(fn: funcWithTask): Function {
     });
 }
 
-export function nextTick(cb?: Function, ctx?: object) {
+export function nextTick<self = object>(cb?: Function, ctx?: self): void | Promise<self> {
     let _resolve: (value?: object) => void;
 
     callbacks.push(() => {

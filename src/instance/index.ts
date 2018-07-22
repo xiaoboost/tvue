@@ -1,22 +1,36 @@
+import VNode, { VNodeData, VNodeChildren } from '../vdom';
+
 import { stateMixin } from './state';
 import { eventsMixin, eventCb } from './events';
+import { renderMixin } from './render';
+import { lifecycleMixin } from './lifecycle';
+
+import { nextTick } from '../utils';
+import { patch } from '../vdom/patch';
 import { Watcher, WatcherOption } from '../observer';
 
+type CreateElement = Vuetc['$createElement'];
 type WatcherCallback = string | ((newVal: any, oldVal: any) => void) | WatcherOption;
 
 export default class Vuetc {
     // 组件属性
     $options!: ComponentOptions;
     $parent?: Vuetc;
+    $el!: Element;
+    $vnode!: VNode;
 
     // 公共方法
     $set!: (target: any, key: string | number, val: any) => void;
     $delete!: (target: any, key: string | number) => void;
-    $watch!: ( express: string, callback: WatcherCallback, option?: WatcherOption) => (() => void);
+    $watch!: (express: string, callback: WatcherCallback, option?: WatcherOption) => (() => void);
     $on!: (eventName: string | string[], fn: eventCb) => void;
     $once!: (eventName: string, fn: eventCb) => void;
     $off!: (eventName?: string | string[], fn?: eventCb) => void;
     $emit!: (eventName: string, ...args: any[]) => void;
+    $forceUpdate!: () => void;
+    $destroy!: () => void;
+    $mount!: (el?: string | Element) => this;
+    $createElement!: (tag?: string, data?: VNodeData | VNodeChildren, children?: VNodeChildren) => VNode;
 
     // 内部私有数据
     _events: { [eventName: string]: Array<(arg?: any) => any> } = {};
@@ -25,11 +39,25 @@ export default class Vuetc {
     _watchers: Watcher[] = [];
     _watcher?: Watcher;
 
+    // 私有方法
+    _render!: () => VNode;
+    _patch!: typeof patch;
+    _update!: (vnode: VNode, hydrating?: boolean) => void;
+
     // 内部私有状态
     _isVue = true;
     _isMounted = false;
     _isDestroyed = false;
     _isBeingDestroyed = false;
+
+    // 渲染函数
+    render!: (h: CreateElement) => VNode;
+
+    $nextTick(): Promise<this>;
+    $nextTick(fn: Function): void;
+    $nextTick(fn?: Function): void | Promise<this> {
+        return nextTick(fn, this);
+    }
 }
 
 export interface ComponentOptions {
@@ -41,3 +69,5 @@ export interface ComponentOptions {
 
 stateMixin(Vuetc);
 eventsMixin(Vuetc);
+renderMixin(Vuetc);
+lifecycleMixin(Vuetc);

@@ -1,7 +1,13 @@
 import Component from '../instance';
 
-type NativeCallback = (e: Event) => any;
-type Callback = (e: any) => any;
+type eventCb = (e: any) => any;
+type nativeCb = (e: Event) => any;
+type hookCb = (...args: any[]) => void;
+type hookNames =
+    'create' | 'init' | 'prepatch' | 'update' |
+    'postpatch' | 'insert' | 'remove' | 'destroy';
+
+export type VNodeChildren = Array<VNode | string>;
 
 export interface VNodeComponentOptions {
     Ctor: typeof Component;
@@ -25,8 +31,9 @@ export interface VNodeData {
     props?: { [key: string]: any };
     attrs?: { [key: string]: any };
     domProps?: { [key: string]: any };
-    on?: { [key: string]: Callback | Callback[] };
-    nativeOn?: { [key: string]: NativeCallback | NativeCallback[] };
+    hook?: { [key in hookNames]?: hookCb[] };
+    on?: { [key: string]: eventCb | eventCb[] };
+    nativeOn?: { [key: string]: nativeCb | nativeCb[] };
     show?: boolean;
     directives?: VNodeDirective[];
 }
@@ -41,9 +48,9 @@ export interface VNodeDirective {
 }
 
 export default class VNode {
-    tag?: string;
-    data?: VNodeData;
-    children?: VNode[];
+    tag: string;
+    data: VNodeData;
+    children: VNode[];
     text?: string;
     elm?: Element;
     context?: Component;
@@ -60,9 +67,9 @@ export default class VNode {
     isOnce = false;
 
     constructor(
-        tag?: string,
-        data?: VNodeData,
-        children?: VNode[],
+        tag: string = '',
+        data: VNodeData = {},
+        children: VNode[] = [],
         text?: string,
         elm?: Element,
         context?: Component,
@@ -76,6 +83,32 @@ export default class VNode {
         this.context = context;
         this.key = data && data.key;
         this.componentOptions = componentOptions;
+    }
+
+    mergeHook(name: hookNames, hook: (...args: any[]) => void) {
+        if (!this.data.hook) {
+            this.data.hook = {};
+        }
+
+        if (!this.data.hook[name]) {
+            this.data.hook[name] = [];
+        }
+
+        (this.data.hook[name]!).push(hook);
+    }
+
+    callHook(name: hookNames, ...args: any[]) {
+        if (this.data.hook && this.data.hook[name]) {
+            const hooks = this.data.hook[name]!;
+
+            for (const hook of hooks) {
+                hook.apply(this, args);
+            }
+
+            // 钩子函数运行之后必须强制删除
+            // 以确保它只被调用一次并防止内存泄漏
+            this.data.hook[name] = [];
+        }
     }
 }
 
