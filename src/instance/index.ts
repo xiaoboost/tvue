@@ -1,9 +1,9 @@
 import VNode, { VNodeData, VNodeChildren } from '../vdom';
 
 import { stateMixin } from './state';
-import { eventsMixin, eventCb } from './events';
 import { renderMixin } from './render';
-import { lifecycleMixin } from './lifecycle';
+import { eventsMixin, eventCb } from './events';
+import { lifecycleMixin, LifecycleKeys } from './lifecycle';
 
 import { nextTick } from '../utils';
 import { patch } from '../vdom/patch';
@@ -30,7 +30,7 @@ export default class Vuetc {
     $forceUpdate!: () => void;
     $destroy!: () => void;
     $mount!: (el?: string | Element) => this;
-    $createElement!: (tag?: string, data?: VNodeData | VNodeChildren, children?: VNodeChildren) => VNode;
+    $createElement!: (tag: string, data?: VNodeData | VNodeChildren, children?: VNodeChildren) => VNode;
 
     // 内部私有数据
     _events: { [eventName: string]: Array<(arg?: any) => any> } = {};
@@ -42,6 +42,7 @@ export default class Vuetc {
     // 私有方法
     _render!: () => VNode;
     _patch!: typeof patch;
+    _callHook!: (name: LifecycleKeys) => void;
     _update!: (vnode: VNode, hydrating?: boolean) => void;
 
     // 内部私有状态
@@ -60,12 +61,14 @@ export default class Vuetc {
     }
 }
 
-export interface ComponentOptions {
+export type ComponentOptions = {
     name?: string;
     components?: { [componentName: string]: typeof Vuetc };
     props?: string[];
     state?: string[];
-}
+} & {
+    [key in LifecycleKeys]?: () => void;
+};
 
 stateMixin(Vuetc);
 eventsMixin(Vuetc);

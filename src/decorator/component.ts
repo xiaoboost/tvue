@@ -1,7 +1,13 @@
 import Vuets, { ComponentOptions } from '../instance';
 import { initState } from '../instance/state';
+import { initRender } from '../instance/render';
+import { LifecycleKeys } from '../instance/lifecycle';
 
 export type VuetsClass<V> = { new (...args: any[]): V & Vuets } & typeof Vuets;
+
+// lifecycle method names
+const lifecycles: LifecycleKeys[] =
+    ['beforeMount', 'mounted', 'beforeDestroy', 'destroyed', 'beforeUpdate'];
 
 function mergeOptions(to: ComponentOptions, from: ComponentOptions) {
     if (from.props) {
@@ -46,6 +52,11 @@ function componentFactory(
             if (key === '$options') {
                 mergeOptions(options, proto[key]);
             }
+            // lifecycle
+            else if (lifecycles.includes(key as LifecycleKeys)) {
+                options[key] = proto[key];
+                delete proto[key];
+            }
             // methods
             // else if (typeof descriptor.value === 'function') {
             //     Object.defineProperty(newProto, key, descriptor);
@@ -70,6 +81,7 @@ function componentFactory(
             Object.setPrototypeOf(this, oldProto);
 
             initState(this);
+            initRender(this);
         }
     }
 

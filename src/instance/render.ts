@@ -7,7 +7,7 @@ import { isArray, warn, handleError } from '../utils';
 
 export function initRender(vm: Component) {
     vm.$createElement = (
-        tag?: string,
+        tag: string,
         data?: VNodeData | VNodeChildren,
         children?: VNodeChildren,
     ) => {
