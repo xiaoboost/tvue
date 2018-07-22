@@ -19,50 +19,37 @@ function componentFactory(
     Comp: VuetsClass<Vuets>,
     options: ComponentOptions = {},
 ): VuetsClass<Vuets> {
-    // collect instance's properties
-    const data = new Comp();
-
-    // new Component class
-    class VueComponent extends Vuets {
-        constructor() {
-            super();
-
-            Object.assign(this, data);
-
-            initState(this);
-        }
-    }
-
     // name of Component
     options.name = options.name || (Comp as any).name;
     // prototype chains
     const chain: Array<VuetsClass<Vuets>> = [];
-    const newProto = VueComponent.prototype;
 
-    let origin = Comp.prototype;
-    while (!origin || origin !== Vuets.prototype) {
-        chain.push(origin);
-        origin = Object.getPrototypeOf(origin);
+    for (
+        let proto = Comp.prototype;
+        !proto || proto !== Vuets.prototype;
+        proto = Object.getPrototypeOf(proto)
+    ) {
+        chain.push(proto);
     }
 
     chain.reverse();
 
-    for (const oldProto of chain) {
-        Object.getOwnPropertyNames(oldProto).forEach((key) => {
+    for (const proto of chain) {
+        Object.getOwnPropertyNames(proto).forEach((key) => {
             if (key === 'constructor') {
                 return;
             }
 
-            const descriptor = Object.getOwnPropertyDescriptor(oldProto, key)!;
+            // const descriptor = Object.getOwnPropertyDescriptor(proto, key)!;
 
             // options
             if (key === '$options') {
-                mergeOptions(options, oldProto[key]);
+                mergeOptions(options, proto[key]);
             }
             // methods
-            else if (typeof descriptor.value === 'function') {
-                Object.defineProperty(newProto, key, descriptor);
-            }
+            // else if (typeof descriptor.value === 'function') {
+            //     Object.defineProperty(newProto, key, descriptor);
+            // }
             // computed properties
             // else if (descriptor.get || descriptor.set) {
             //     (options.computed || (options.computed = {}))[key] = {
@@ -73,7 +60,20 @@ function componentFactory(
         });
     }
 
-    Object.defineProperty(newProto, '$options', {
+    const oldProto = chain[chain.length - 1];
+
+    // new Component class
+    class VueComponent extends Comp {
+        constructor() {
+            super();
+
+            Object.setPrototypeOf(this, oldProto);
+
+            initState(this);
+        }
+    }
+
+    Object.defineProperty(oldProto, '$options', {
         configurable: true,
         enumerable: false,
         writable: false,
