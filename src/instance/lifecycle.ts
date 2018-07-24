@@ -29,8 +29,9 @@ export function lifecycleMixin(Vue: typeof Component) {
     };
 
     Vue.prototype._callHook = function(this: Component, name: LifecycleKeys) {
-        const handler = this.$options[name];
-        if (handler) {
+        const handlers = this.$options[name] || [];
+
+        for (const handler of handlers) {
             try {
                 handler.call(this);
             }

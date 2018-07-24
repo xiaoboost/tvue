@@ -68,7 +68,7 @@ export type ComponentOptions = {
     props?: string[];
     state?: string[];
 } & {
-    [key in LifecycleKeys]?: () => void;
+    [key in LifecycleKeys]?: Array<() => void>;
 };
 
 stateMixin(Vuetc);

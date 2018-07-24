@@ -19,6 +19,17 @@ function mergeOptions(to: ComponentOptions, from: ComponentOptions) {
         to.state = (to.state || []).concat(from.state);
         to.state = Array.from(new Set(to.state));
     }
+
+    for (const fnKey of lifecycles) {
+        const fns = from[fnKey];
+        if (fns) {
+            to[fnKey] = (to[fnKey] || []).concat(fns);
+        }
+    }
+}
+
+function isLifecycle(x: string): x is LifecycleKeys {
+    return lifecycles.includes(x as any);
 }
 
 function componentFactory(
@@ -53,8 +64,13 @@ function componentFactory(
                 mergeOptions(options, proto[key]);
             }
             // lifecycle
-            else if (lifecycles.includes(key as LifecycleKeys)) {
-                options[key] = proto[key];
+            else if (isLifecycle(key)) {
+                if (!options[key]) {
+                    options[key] = [];
+                }
+
+                (options[key]!).push(proto[key]);
+
                 delete proto[key];
             }
             // methods
@@ -71,28 +87,26 @@ function componentFactory(
         });
     }
 
-    const oldProto = chain[chain.length - 1];
+    const nowProto = chain[chain.length - 1];
 
-    // new Component class
-    class VueComponent extends Comp {
-        constructor() {
-            super();
-
-            Object.setPrototypeOf(this, oldProto);
-
-            initState(this);
-            initRender(this);
-        }
-    }
-
-    Object.defineProperty(oldProto, '$options', {
+    Object.defineProperty(nowProto, '$options', {
         configurable: true,
         enumerable: false,
         writable: false,
         value: options,
     });
 
-    return VueComponent;
+    // new Component class
+    return class VueComponent extends Comp {
+        constructor() {
+            super();
+
+            Object.setPrototypeOf(this, nowProto);
+
+            initState(this);
+            initRender(this);
+        }
+    };
 }
 
 export function Component<V extends Vuets>(options: ComponentOptions): <VC extends VuetsClass<V>>(target: VC) => VC;
