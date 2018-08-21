@@ -88,8 +88,8 @@
         "prefer-function-over-method": false,
         // 方法定义不强制使用 foo(): void 这种形式
         "prefer-method-signature": false,
-        // 多字符串相连时应该使用字符串模板
-        "prefer-template": [true, "allow-single-concat"],
+        // 多字符串相连时不强制使用字符串模板
+        "prefer-template": false,
         // 字符串强制使用单引号
         "quotemark": [true, "single"],
         // switch 语句的最后一个分支不需要 break

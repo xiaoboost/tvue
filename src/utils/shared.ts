@@ -52,6 +52,14 @@ export function hyphenate(str: string) {
 }
 
 /**
+ * Camelize a hyphen-delimited string.
+ * @param {string} str
+ */
+export function camelize(str: string) {
+    return str.replace(/-(\w)/g, (_, c) => c ? c.toUpperCase() : '');
+}
+
+/**
  * 检查 key 是否存在于 obj 对象中
  * @param obj 检查对象
  * @param key 检查的属性名称
