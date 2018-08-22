@@ -62,7 +62,7 @@ export function createElement(
         );
     }
 
-    let vnode: VNode;
+    let vnode: VNode | void;
 
     if (typeof tag === 'string') {
         if (isReservedTag(tag)) {
@@ -83,7 +83,8 @@ export function createElement(
 
         // apply ns
         const ns = context.$vnode.ns || getTagNamespace(tag);
-        if (ns) {
+
+        if (ns && vnode) {
             applyNS(vnode, ns);
         }
     }

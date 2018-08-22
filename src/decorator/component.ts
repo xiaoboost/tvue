@@ -87,6 +87,8 @@ function componentFactory(
         });
     }
 
+    // TODO: components 选项重的 key 全部要写成驼峰形式的
+
     const nowProto = chain[chain.length - 1];
 
     Object.defineProperty(nowProto, '$options', {

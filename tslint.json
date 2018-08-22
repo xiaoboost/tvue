@@ -2,6 +2,8 @@
     "defaultSeverity": "error",
     "extends":"tslint:recommended",
     "rules": {
+        // 复杂数组类型不强制使用 Array<T> 的形式
+        "array-type": false,
         // 允许直接使用 Number 等内置类型构造函数名称直接作为类型
         "ban-types": false,
         // 不强制 class/interface 内字段顺序
