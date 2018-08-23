@@ -1,5 +1,6 @@
-import VNode from '../vdom';
 import Component from './index';
+import VNode, { createEmptyVNode } from '../vdom';
+
 import { Watcher } from '../observer';
 import { isString, remove, warn, handleError } from '../utils';
 
@@ -15,7 +16,7 @@ export function lifecycleMixin(Vue: typeof Component) {
 
         if (!prevVnode) {
             // initial render
-            this.$el = this._patch(this.$el, vnode, false /* removeOnly */);
+            this.$el = this._patch(createEmptyVNode(), vnode, false /* removeOnly */);
         }
         else {
             // updates

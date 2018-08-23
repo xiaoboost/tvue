@@ -124,10 +124,10 @@ export function isRegExp(x: any): x is RegExp {
  * 断言：输入是否是 DOM 元素
  *
  * @param {*} x
- * @returns {x is HTMLElement}
+ * @returns {x is Element}
  */
-export function isElement(x: any): x is HTMLElement {
-    return (/^\[object (HTML|SVG)([a-zA-Z]+)?Element\]$/.test(_toString.call(x) as string));
+export function isElement(x: any): x is Element {
+    return x.hasOwnProperty('nodeType') && x.hasOwnProperty('nodeName');
 }
 
 /**
