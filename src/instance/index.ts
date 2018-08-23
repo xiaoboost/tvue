@@ -19,6 +19,7 @@ export default class Vuetc {
     $el!: Element;
     $vnode!: VNode;
     $children: Vuetc[] = [];
+    $refs!: Element | Element[] | Vuetc | Vuetc[];
 
     // 公共方法
     $set!: (target: any, key: string | number, val: any) => void;
