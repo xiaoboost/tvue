@@ -106,9 +106,7 @@ export function isObject(x: any): x is object {
  * @param {*} x
  * @returns {x is any[]}
  */
-export function isArray(x: any): x is any[] {
-    return Array.isArray(x);
-}
+export const isArray = Array.isArray;
 
 /**
  * 断言：输入是否是正则表达式

@@ -25,7 +25,9 @@ export interface VNodeData {
     refInFor?: boolean;
     model?: { value: any; callback(val: any): void };
     staticClass?: string;
-    class?: string | string[] | { [className: string]: boolean };
+    class?:
+        string | { [className: string]: boolean } |
+        Array<string | { [className: string]: boolean }>;
     staticStyle?: CSSStyleDeclaration;
     style?: CSSStyleDeclaration[] | CSSStyleDeclaration;
     props?: { [key: string]: any };

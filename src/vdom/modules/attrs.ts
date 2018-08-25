@@ -2,7 +2,6 @@ import VNode from '../vnode';
 import { HookFuncExport } from './index';
 
 import {
-    isUndef,
     makeMap,
     isElement,
 } from 'src/utils';
@@ -70,9 +69,7 @@ function setAttr(el: Element, key: string, value?: string) {
 }
 
 function updateAttrs(oldVnode: VNode, vnode: VNode) {
-    const opts = vnode.componentOptions;
-
-    if (isUndef(oldVnode.data.attrs) && isUndef(vnode.data.attrs)) {
+    if (!oldVnode.data.attrs && !vnode.data.attrs) {
         return;
     }
 
@@ -84,17 +81,17 @@ function updateAttrs(oldVnode: VNode, vnode: VNode) {
         throw new Error('(patch) not found element');
     }
 
-    Object.keys(attrs).forEach((key) => {
+    for (const key of Object.keys(attrs)) {
         const cur = attrs[key];
         const old = oldAttrs[key];
 
         if (old !== cur) {
             setAttr(elm, key, cur);
         }
-    });
+    }
 
-    Object.keys(oldAttrs).forEach((key) => {
-        if (isUndef(attrs[key])) {
+    for (const key of Object.keys(oldAttrs)) {
+        if (!attrs[key]) {
             if (isXlink(key)) {
                 elm.removeAttributeNS(xlinkNS, getXlinkProp(key));
             }
@@ -102,7 +99,7 @@ function updateAttrs(oldVnode: VNode, vnode: VNode) {
                 elm.removeAttribute(key);
             }
           }
-    });
+    }
 }
 
 const attrHook: HookFuncExport = {
