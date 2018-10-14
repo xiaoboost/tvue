@@ -7,7 +7,7 @@ import { lifecycleMixin, LifecycleKeys } from './lifecycle';
 
 import { nextTick } from '../utils';
 import { patch } from '../vdom/patch';
-import { Watcher, WatcherOption } from '../observer';
+import { Watcher, Observer, WatcherOption } from '../observer';
 
 type CreateElement = Vuetc['$createElement'];
 type WatcherCallback = string | ((newVal: any, oldVal: any) => void) | WatcherOption;
@@ -22,8 +22,8 @@ export default class Vuetc {
     $refs!: Element | Element[] | Vuetc | Vuetc[];
 
     // 公共方法
-    $set!: (target: any, key: string | number, val: any) => void;
-    $delete!: (target: any, key: string | number) => void;
+    $set!: (key: string | number, val: any) => void;
+    $delete!: (key: string | number) => void;
     $watch!: (express: string, callback: WatcherCallback, option?: WatcherOption) => (() => void);
     $on!: (eventName: string | string[], fn: eventCb) => void;
     $once!: (eventName: string, fn: eventCb) => void;
@@ -39,7 +39,7 @@ export default class Vuetc {
     _state: { [stateName: string]: any } = {};
     _props: { [propName: string]: any } = {};
     _watchers: Watcher[] = [];
-    _watcher?: Watcher;
+    _observers: Observer[] = [];
 
     // 私有方法
     _render!: () => VNode;
