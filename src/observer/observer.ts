@@ -1,21 +1,22 @@
 import {
-    hasOwn,
+    def,
     isArray,
     isObject,
-    handleError,
 } from '../utils';
 
 export interface ObservedObject {
-    __ob__: Observer;
+    obProperty: Observer;
     [key: string]: any;
 }
 
-interface Subscription {
-    update(): void;
+export interface Subscription {
+    $forceUpdate(): void;
 }
 
 /** 全局观测器计数 */
 let obCount = 0;
+/** 被观测对象添加的观测器属性 */
+const obProperty = Symbol('observer');
 
 /** 观测器 */
 export default class Observer {
@@ -26,10 +27,10 @@ export default class Observer {
     /** 代理对象 */
     proxy: object;
     /** 当前观测器的订阅器 */
-    subscriptions: Subscription[] = [];
+    subscriptions = new Set<Subscription>();
 
     static is(x: any): x is ObservedObject {
-        return hasOwn(x, '__ob__') && x.__ob__ instanceof Observer;
+        return x.hasOwnProperty(obProperty) && x[obProperty] instanceof Observer;
     }
 
     /**
@@ -37,7 +38,7 @@ export default class Observer {
      *  - 不可枚举的属性不会被包装
      */
     static set<T extends object>(x: T): T {
-        if (!isObject(x)) {
+        if (!isObject(x) || Observer.is(x)) {
             return x;
         }
 
@@ -45,9 +46,7 @@ export default class Observer {
             Observer.set(value);
         }
 
-        new Observer(x);
-
-        return x;
+        return (new Observer(x).proxy as any);
     }
 
     constructor(value: object) {
@@ -58,15 +57,20 @@ export default class Observer {
 
         if (isArray(value)) {
             proxyHandler.get = (...args) => {
-                this.getArrayMethods(...args);
+                return this.getArrayProperties(...args);
             };
         }
-        else if (!isObject(value)) {
-            handleError(new Error('Must be a Object'));
+        else if (isObject(value)) {
+            proxyHandler.get = (...args) => {
+                return this.getObjectProperties(...args);
+            };
+        }
+        else {
+            throw new Error('Observer must set in a Object');
         }
 
+        def(value, obProperty, this);
         this.value = value as any;
-        this.value.__ob__ = this;
         this.proxy = new Proxy(value, proxyHandler);
     }
 
@@ -89,12 +93,24 @@ export default class Observer {
         return result;
     }
 
-    getArrayMethods(target: object, key: PropertyKey, receiver: any) {
+    getObjectProperties(target: object, key: PropertyKey, receiver: any) {
+        if (observeSwitch) {
+            targetStack.add(this.value);
+        }
+
+        return target[key];
+    }
+
+    getArrayProperties(target: object, key: PropertyKey, receiver: any) {
         /** 所有需要拦截的数组方法名称 */
         const methodsToIntercept = [
             'push', 'pop', 'shift', 'unshift',
             'splice', 'sort', 'reverse',
         ];
+
+        if (observeSwitch) {
+            targetStack.add(this.value);
+        }
 
         // 拦截属性
         if (methodsToIntercept.includes(key as string)) {
@@ -108,9 +124,36 @@ export default class Observer {
         }
     }
 
-    broadcast() {
-        for (const sub of this.subscriptions) {
-            sub.update();
+    /** 添加订阅器 */
+    addSub(subscription: Subscription, deep = true) {
+        this.subscriptions.add(subscription);
+
+        if (!deep) {
+            return;
         }
     }
+
+    /** 触发订阅的更新 */
+    broadcast() {
+        for (const sub of this.subscriptions) {
+            sub.$forceUpdate();
+        }
+    }
+}
+
+/** 观测收集器开关 */
+let observeSwitch = false;
+/** 观测器集合 */
+const targetStack = new Set<object>();
+
+/** 开始收集依赖 */
+export function startCollect() {
+    observeSwitch = true;
+    targetStack.clear();
+}
+
+/** 停止收集依赖，并返回堆栈内的所有内容 */
+export function stopCollect() {
+    observeSwitch = false;
+    return Array.from(targetStack);
 }

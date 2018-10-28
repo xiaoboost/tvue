@@ -9,7 +9,7 @@ export function isReserved(str: string): boolean {
 /**
  * Define a property.
  */
-export function def(obj: object, key: string, val: any, enumerable = false) {
+export function def(obj: object, key: string | symbol, val: any, enumerable = false) {
     Object.defineProperty(obj, key, {
         value: val,
         enumerable,
